@@ -1,3 +1,7 @@
+# IMPORTANT ADNOTATION
+
+Jest to kopia oryginalnego, prywatnego repozytorium projektu, udostępniona tutaj na potrzeby zaliczenia projektu na studia.
+
 # TEA-SHOP-POSTGRESQL
 
 This is implementation of lovely backend for POS system for lovely Czajownia using [Fastapi](
