@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  notebook:
+    build:
+      context: server
+
+    ports:
+      - "7500:7500"
+    volumes:
+      - ./server:/app
+
+    command: jupyter notebook --ip="0.0.0.0" --port=7500 --allow-root

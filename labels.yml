@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  client:
+    expose:
+      - 80
+    labels:
+      - "traefik.http.routers.client.rule=Host(`${APP_ADDRESS}`)"
+      - "traefik.http.routers.client.entrypoints=web"
+
+  server:
+    labels:
+      - "traefik.http.routers.server.rule=Host(`${APP_ADDRESS}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.server.entrypoints=web"

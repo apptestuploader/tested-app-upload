@@ -1,0 +1,70 @@
+version: "3.8"
+
+services:
+  db:
+    restart: always
+    volumes:
+      - app-db-data:/var/lib/postgresql/data/teashop
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=test_db
+      - PGDATA=/var/lib/postgresql/data/teashop/
+
+  client:
+    image: ${IMAGE_CLIENT}
+    restart: always
+    build:
+      target: prod
+
+    command: nginx -g "daemon off;"
+    labels:
+      - "traefik.http.routers.client.entrypoints=websecure"
+      - "traefik.http.routers.client.tls.certresolver=le"
+      - "traefik.http.routers.client.tls=true"
+
+  server:
+    image: ${IMAGE_SERVER}
+    restart: always
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/tea-shop
+      REGISTER_SECRET: $REGISTER_SECRET
+      ENV: prod
+
+    command: bash -c "alembic upgrade head && python -m app.start"
+
+    labels:
+      - "traefik.http.routers.server.entrypoints=websecure"
+      - "traefik.http.routers.server.tls.certresolver=le"
+      - "traefik.http.routers.server.tls=true"
+
+  reverse-proxy:
+    command:
+      - --log.level=DEBUG
+      - --providers.docker=true
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.le.acme.httpchallenge=true
+      - --certificatesresolvers.le.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.le.acme.email=${EMAIL}
+      - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+
+    ports:
+      - "443:443"
+
+    volumes:
+      - ./traefik/letsencrypt:/letsencrypt
+
+    labels:
+      - "traefik.http.routers.reverse-proxy.tls=true"
+      - "traefik.http.routers.reverse-proxy.tls.certresolver=le"
+      - "traefik.http.routers.reverse-proxy.entrypoints=websecure"
+      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=web"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
+      - "traefik.http.routers.middlewares.redirect-to-https.redirectscheme=https"
+
+
+volumes:
+  app-db-data:

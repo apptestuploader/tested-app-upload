@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  db:
+    ports:
+      - "5432:5432"
+    volumes:
+      - app-db-data:/var/lib/postgresql/data/teashop
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=test_db
+      - PGDATA=/var/lib/postgresql/data/teashop/
+
+  client:
+    env_file:
+      - ./client/.env
+    build:
+      target: dev
+    volumes:
+      - ./client:/app
+#      - /app/node_modules # Use with webstorm release; ref: https://youtrack.jetbrains.com/issue/WEB-52982
+
+  server:
+    env_file:
+      - ./server/.env
+    environment:
+      DB_ADDRESS: db:5432
+
+    volumes:
+      - ./server:/app
+
+
+volumes:
+  app-db-data:

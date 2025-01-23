@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  storybook:
+    image: tea-shop-postgresql_client
+
+    volumes:
+      - ./client:/app
+
+    command: yarn storybook
+    labels:
+      - "traefik.http.routers.storybook.rule=Host(`storybook.localhost`)"
+      - "traefik.http.routers.storybook.entrypoints=web"
+      - "traefik.http.services.service_name.loadbalancer.server.port=6006"

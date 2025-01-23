@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:14
+  redis:
+    image: redis:6
+
+  client:
+    build:
+      context: client
+      target: dev
+    command: yarn start
+
+  server:
+    build:
+      context: server
+    command: bash -c "alembic upgrade head && python -m app.start"
+    depends_on:
+      - db
+
+  reverse-proxy:
+    restart: always
+    image: traefik:v2.8
+    command:
+      - --log.level=DEBUG
+      - --api.insecure=true
+      - --providers.docker
+      - --entrypoints.web.address=:80
+
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

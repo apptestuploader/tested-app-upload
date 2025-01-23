@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  black:
+    build:
+      context: server
+      dockerfile: dev/Dockerfile-black
+
+    ports:
+      - "45484:45484"
+
+    volumes:
+      - ./server:/app
+

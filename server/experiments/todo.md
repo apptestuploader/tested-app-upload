@@ -1,0 +1,3 @@
+- [ ] Investigate items which prices cannot be parsed.
+- [ ] Investigate missing quantities.
+- [ ] Map types to english names.
